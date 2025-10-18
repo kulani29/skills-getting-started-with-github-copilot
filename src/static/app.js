@@ -9,47 +9,41 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch("/activities");
       const activities = await response.json();
-      const template = document.getElementById("activity-template");
 
-      // Clear loading message
+      // Clear activities list
       activitiesList.innerHTML = "";
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
-        const activityCard = template.content.cloneNode(true);
-        const card = activityCard.querySelector('.activity-card');
-        
-        // Set card properties
-        card.dataset.id = name.toLowerCase().replace(/\s+/g, '-');
-        card.querySelector('.activity-title').textContent = name;
-        card.querySelector('.activity-desc').textContent = details.description;
-        card.querySelector('.participants').setAttribute('aria-label', `Participants for ${name}`);
-
-        // Add participants
-        const participantsList = card.querySelector('.participants-list');
-        if (details.participants.length === 0) {
-          participantsList.innerHTML = '<li class="no-participants">No participants yet.</li>';
-        } else {
-          details.participants.forEach(participant => {
-            const initials = participant.split(' ')
-              .map(part => part[0])
-              .join('')
-              .toUpperCase();
-            const li = document.createElement('li');
-            li.innerHTML = `<span class="avatar">${initials}</span>${participant}`;
-            participantsList.appendChild(li);
-          });
-        }
-
-        // Add schedule and spots info
-        const scheduleP = document.createElement('p');
-        scheduleP.innerHTML = `<strong>Schedule:</strong> ${details.schedule}`;
-        card.querySelector('.activity-desc').after(scheduleP);
+        const activityCard = document.createElement("div");
+        activityCard.className = "activity-card";
 
         const spotsLeft = details.max_participants - details.participants.length;
-        const spotsP = document.createElement('p');
-        spotsP.innerHTML = `<strong>Availability:</strong> ${spotsLeft} spots left`;
-        scheduleP.after(spotsP);
+
+        activityCard.innerHTML = `
+          <h4>${name}</h4>
+          <p>${details.description}</p>
+          <p><strong>Schedule:</strong> ${details.schedule}</p>
+          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <div class="participants-section">
+            <h5>Current Participants</h5>
+            <ul class="participants-list">
+              ${details.participants.length ? 
+                details.participants.map(participant => {
+                  const initials = participant.split(' ')
+                    .map(part => part[0])
+                    .join('')
+                    .toUpperCase();
+                  return `<li>
+                    <span class="participant-avatar">${initials}</span>
+                    ${participant}
+                  </li>`;
+                }).join('') : 
+                '<li class="no-participants">No participants yet</li>'
+              }
+            </ul>
+          </div>
+        `;
 
         activitiesList.appendChild(activityCard);
 
@@ -86,6 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+
+        // Refresh activities to show updated participants
+        await fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
