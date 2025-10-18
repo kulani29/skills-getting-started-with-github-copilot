@@ -164,6 +164,25 @@ footer {
   font-weight: bold;
 }
 
+/* Remove button for participants */
+.participant-remove {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #c62828;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.participant-remove:hover {
+  background: rgba(198, 40, 40, 0.08);
+}
+
+.participant-name { 
+  word-break: break-word;
+}
+
 .no-participants {
   color: #666;
   font-style: italic;
